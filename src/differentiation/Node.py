@@ -194,3 +194,12 @@ class _MatrixMultiplication(Node):
     def storeDerivatives(self):
         self.parents[0].grad += _matchShape( self.grad @ self.parents[1].value.T, self.parents[0].grad.shape )
         self.parents[1].grad += _matchShape( self.parents[0].value.T @ self.grad, self.parents[1].grad.shape )
+
+
+class ReLU(Node):
+    def __init__(self, node: Node|float):
+        if not isinstance(node, Node): node = Node([node])
+        super().__init__(np.maximum(node.value, 0), [node])
+
+    def storeDerivatives(self):
+        self.parents[0].grad += _matchShape( self.grad * (self.value > 0).astype(float), self.parents[0].grad.shape )
