@@ -10,6 +10,7 @@ class DataLoader:
         self.labels = np.array(labels)
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.indexes = np.arange(len(self.inputs))
 
 
     def __len__(self):
