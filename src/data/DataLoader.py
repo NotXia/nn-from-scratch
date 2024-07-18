@@ -16,22 +16,24 @@ class DataLoader:
         return len(self.inputs) // self.batch_size
     
 
+    def __getitem__(self, idx):
+        indexes = self.indexes[idx*self.batch_size : (idx+1)*self.batch_size]
+        batch_inputs = [ self.inputs[indexes[i]] for i in range(len(indexes)) ]
+        batch_labels = [ self.labels[indexes[i]] for i in range(len(indexes)) ]
+        return batch_inputs, batch_labels
+
+
     def __iter__(self):
-        self.indexes = [ *range(len(self.inputs)) ]
+        self.indexes = np.arange(len(self.inputs))
         if self.shuffle: 
-            random.shuffle(self.indexes)
+            np.random.shuffle(self.indexes)
+        self.curr_batch = 0
         return self
 
 
     def __next__(self):
-        if len(self.indexes) < self.batch_size: raise StopIteration
+        if self.curr_batch >= len(self): raise StopIteration
 
-        batch_inputs = []
-        batch_labels = []
-        for _ in range(self.batch_size):
-            choice = random.randint(0, len(self.indexes)-1)
-            idx = self.indexes[choice]
-            batch_inputs.append( self.inputs[idx] )
-            batch_labels.append( self.labels[idx] )
-            self.indexes.pop(choice)
+        batch_inputs, batch_labels = self[self.curr_batch]
+        self.curr_batch += 1
         return batch_inputs, batch_labels
