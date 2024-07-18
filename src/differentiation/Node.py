@@ -130,6 +130,10 @@ class Node:
         return self.transpose()
 
 
+    def sum(self, axis: int|None=None, keepdims: bool=False) -> Node:
+        return _Summation(self, axis, keepdims)
+
+
 
 class _Addition(Node):
     def __init__(self, node1: Node|np.ndarray|float, node2: Node|np.ndarray|float):
@@ -138,8 +142,8 @@ class _Addition(Node):
         super().__init__(node1.value + node2.value, [node1, node2])
 
     def storeDerivatives(self):
-        self.parents[0].grad += _matchShape( self.grad * 1, self.parents[0].grad.shape )
-        self.parents[1].grad += _matchShape( self.grad * 1, self.parents[1].grad.shape )
+        self.parents[0].grad += _matchShape( self.grad * np.ones_like(self.parents[0].grad), self.parents[0].grad.shape )
+        self.parents[1].grad += _matchShape( self.grad * np.ones_like(self.parents[0].grad), self.parents[1].grad.shape )
 
 
 class _Negation(Node):
@@ -148,7 +152,7 @@ class _Negation(Node):
         super().__init__(-node.value, [node])
 
     def storeDerivatives(self):
-        self.parents[0].grad += _matchShape( self.grad * -1, self.parents[0].grad.shape )
+        self.parents[0].grad += _matchShape( self.grad * -np.ones_like(self.parents[0].grad), self.parents[0].grad.shape )
 
 
 class _Product(Node):
@@ -220,6 +224,15 @@ class _Transpose(Node):
 
     def storeDerivatives(self):
         self.parents[0].grad += _matchShape( self.grad.T, self.parents[0].grad.shape )
+
+
+class _Summation(Node):
+    def __init__(self, node: Node|np.ndarray, axis: int|None=None, keepdims: bool=False):
+        node = toNode(node)
+        super().__init__(np.sum(node.value, axis=axis, keepdims=keepdims), [node])
+
+    def storeDerivatives(self):
+        self.parents[0].grad += _matchShape( self.grad * np.ones_like(self.parents[0].grad), self.parents[0].grad.shape )
 
 
 class ReLU(Node):

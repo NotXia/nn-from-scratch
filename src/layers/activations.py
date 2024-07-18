@@ -26,3 +26,6 @@ class Tanh(_ActivationLayer):
 
 class ReLU(_ActivationLayer):
     def __init__(self): super().__init__(relu)
+
+class Softmax(_ActivationLayer):
+    def __init__(self): super().__init__(softmax)

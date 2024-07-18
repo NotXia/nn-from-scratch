@@ -34,7 +34,7 @@ class Trainer:
                 batch_loss.backward()
                 self.optimizer.step()
 
-                epoch_train_loss += batch_loss.value[0, 0]
+                epoch_train_loss += batch_loss.value
 
             epoch_train_loss = epoch_train_loss / len(self.train_data)
             print(f"Epoch {epoch+1} | train_loss: {epoch_train_loss:.4f}")

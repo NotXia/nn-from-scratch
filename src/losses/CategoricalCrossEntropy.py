@@ -1,9 +1,10 @@
 from .Loss import Loss
 from differentiation import Node
+import numpy as np
 
 
 
-class BinaryCrossEntropy(Loss):
+class CategoricalCrossEntropy(Loss):
     def __init__(self):
         pass
 
@@ -12,8 +13,9 @@ class BinaryCrossEntropy(Loss):
         batch_loss = Node(0)
         
         for pred, label in zip(preds, labels):
-            batch_loss += -(label * Node.log(pred) + (1-label) * Node.log(1-pred))
+            mask = np.zeros_like(pred.value)
+            mask[np.argmax(label)] = 1
+            batch_loss += -Node.sum( Node(mask) * Node.log(pred) )
         batch_loss = batch_loss / len(preds)
-        batch_loss = batch_loss.sum()
 
         return batch_loss
