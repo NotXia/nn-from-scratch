@@ -28,15 +28,6 @@ def toNode(x: Node|np.ndarray|float) -> Node:
 
 
 class Node:
-    @staticmethod
-    def log(node: Node): 
-        return node.log()
-        
-    @staticmethod
-    def exp(node: Node): 
-        return node.exp()
-
-
     def __init__(self, value: np.ndarray|float, parents: list[Node]|None=None):
         self.value = np.array(value, dtype=float)
         self.parents = parents if parents is not None else []
@@ -132,6 +123,10 @@ class Node:
 
     def sum(self, axis: int|None=None, keepdims: bool=False) -> Node:
         return _Summation(self, axis, keepdims)
+    
+
+    def max(self) -> Node:
+        return _Max(self)
 
 
 
@@ -233,6 +228,15 @@ class _Summation(Node):
 
     def storeDerivatives(self):
         self.parents[0].grad += _matchShape( self.grad * np.ones_like(self.parents[0].grad), self.parents[0].grad.shape )
+
+
+class _Max(Node):
+    def __init__(self, node: Node|np.ndarray):
+        node = toNode(node)
+        super().__init__(np.max(node.value), [node])
+
+    def storeDerivatives(self):
+        self.parents[0].grad += _matchShape( self.grad * (self.parents[0].value == self.value), self.parents[0].grad.shape )
 
 
 class ReLU(Node):
