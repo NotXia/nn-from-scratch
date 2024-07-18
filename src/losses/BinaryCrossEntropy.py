@@ -8,5 +8,11 @@ class BinaryCrossEntropy(Loss):
         pass
 
 
-    def __call__(self, pred: Node, label: Node) -> Node:
-        return -(label * Node.log(pred) + (1-label) * Node.log(1-pred))
+    def __call__(self, preds: list[Node], labels: list[Node]) -> Node:
+        batch_loss = Node(0)
+        
+        for pred, label in zip(preds, labels):
+            batch_loss += -(label * Node.log(pred) + (1-label) * Node.log(1-pred))
+        batch_loss = batch_loss / len(preds)
+
+        return batch_loss

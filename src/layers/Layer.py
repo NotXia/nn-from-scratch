@@ -5,7 +5,7 @@ from differentiation import Node
 
 class Layer(ABC):
     @abstractmethod
-    def __call__(self, x: Node):
+    def __call__(self, batch: list[Node]):
         pass
     
 

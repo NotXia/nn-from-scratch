@@ -12,8 +12,11 @@ class Linear(Layer):
         self.biases = Node( np.zeros((out_dim, )) )
 
 
-    def __call__(self, x: Node):
-        return (x @ self.weights) + self.biases
+    def __call__(self, batch: list[Node]):
+        return [
+            (self.weights.T @ x) + self.biases
+            for x in batch
+        ]
     
 
     def zero_grad(self):

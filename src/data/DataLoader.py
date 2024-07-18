@@ -5,8 +5,9 @@ import random
 
 class DataLoader:
     def __init__(self, inputs: np.ndarray, labels: np.ndarray, batch_size: int, shuffle: bool=True):
-        self.inputs = inputs
-        self.labels = labels
+        assert len(inputs) == len(labels)
+        self.inputs = np.expand_dims(np.array(inputs), axis=-1) # Extra dimension for easier dot product
+        self.labels = np.array(labels)
         self.batch_size = batch_size
         self.shuffle = shuffle
 
@@ -25,10 +26,12 @@ class DataLoader:
     def __next__(self):
         if len(self.indexes) < self.batch_size: raise StopIteration
 
-        batch = []
+        batch_inputs = []
+        batch_labels = []
         for _ in range(self.batch_size):
             choice = random.randint(0, len(self.indexes)-1)
             idx = self.indexes[choice]
-            batch.append( (self.inputs[idx], self.labels[idx]) )
+            batch_inputs.append( self.inputs[idx] )
+            batch_labels.append( self.labels[idx] )
             self.indexes.pop(choice)
-        return batch
+        return batch_inputs, batch_labels

@@ -27,15 +27,10 @@ class Trainer:
         for epoch in range(epochs):
             epoch_train_loss = 0
 
-            for batch in self.train_data:
+            for inputs, labels in self.train_data:
                 self.optimizer.zero_grad()
-                batch_loss = Node(0)
-
-                for input, label in batch:
-                    pred = self.model(input)
-                    batch_loss += self.loss(pred, label)
-                
-                batch_loss = batch_loss / len(batch)
+                preds = self.model(inputs)
+                batch_loss = self.loss(preds, labels)
                 batch_loss.backward()
                 self.optimizer.step()
 

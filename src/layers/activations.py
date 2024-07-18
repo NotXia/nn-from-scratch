@@ -8,8 +8,8 @@ class _ActivationLayer(Layer):
     def __init__(self, activation_fn):
         self.activation_fn = activation_fn
 
-    def __call__(self, x: Node):
-        return self.activation_fn(x)
+    def __call__(self, batch: list[Node]):
+        return [ self.activation_fn(x) for x in batch ]
 
     def zero_grad(self):
         pass

@@ -18,6 +18,15 @@ def _matchShape(arr: np.ndarray, target_shape: tuple[int]) -> np.ndarray:
     return arr
 
 
+def toNode(x: Node|np.ndarray|float) -> Node:
+    if isinstance(x, Node): 
+        return x
+    if isinstance(x, float): 
+        return Node([x])
+    else:
+        return Node(x) 
+
+
 class Node:
     @staticmethod
     def log(node: Node): 
@@ -60,17 +69,17 @@ class Node:
             nodes_to_grad += node.parents
 
 
-    def __add__(self, node: Node|float) -> Node:
+    def __add__(self, node: Node|np.ndarray|float) -> Node:
         return _Addition(self, node)
     
-    def __radd__(self, node: Node|float) -> Node:
+    def __radd__(self, node: Node|np.ndarray|float) -> Node:
         return _Addition(node, self)
     
 
-    def __sub__(self, node: Node|float) -> Node:
+    def __sub__(self, node: Node|np.ndarray|float) -> Node:
         return _Addition(self, _Negation(node))
     
-    def __rsub__(self, node: Node|float) -> Node:
+    def __rsub__(self, node: Node|np.ndarray|float) -> Node:
         return _Addition(node, _Negation(self))
 
 
@@ -78,24 +87,24 @@ class Node:
         return _Negation(self)
     
 
-    def __mul__(self, node: Node|float) -> Node:
+    def __mul__(self, node: Node|np.ndarray|float) -> Node:
         return _Product(self, node)
 
-    def __rmul__(self, node: Node|float) -> Node:
+    def __rmul__(self, node: Node|np.ndarray|float) -> Node:
         return _Product(node, self)
     
 
-    def __truediv__(self, node: Node|float) -> Node:
+    def __truediv__(self, node: Node|np.ndarray|float) -> Node:
         return _Division(self, node)
 
-    def __rtruediv__(self, node: Node|float) -> Node:
+    def __rtruediv__(self, node: Node|np.ndarray|float) -> Node:
         return _Division(node, self)
     
 
-    def __pow__(self, node: Node|float) -> Node:
+    def __pow__(self, node: Node|np.ndarray|float) -> Node:
         return _Power(self, node)
 
-    def __rpow__(self, node: Node|float) -> Node:
+    def __rpow__(self, node: Node|np.ndarray|float) -> Node:
         return _Power(node, self)
     
 
@@ -106,18 +115,26 @@ class Node:
         return _Exponential(self)
 
 
-    def __matmul__(self, node: Node|float) -> Node:
+    def __matmul__(self, node: Node|np.ndarray|float) -> Node:
         return _MatrixMultiplication(self, node)
     
-    def __rmatmul__(self, node: Node|float) -> Node:
+    def __rmatmul__(self, node: Node|np.ndarray|float) -> Node:
         return _MatrixMultiplication(node, self)
     
 
+    def transpose(self) -> Node:
+        return _Transpose(self)
+
+    @property
+    def T(self):
+        return self.transpose()
+
+
 
 class _Addition(Node):
-    def __init__(self, node1: Node|float, node2: Node|float):
-        if not isinstance(node1, Node): node1 = Node([node1])
-        if not isinstance(node2, Node): node2 = Node([node2])
+    def __init__(self, node1: Node|np.ndarray|float, node2: Node|np.ndarray|float):
+        node1 = toNode(node1)
+        node2 = toNode(node2)
         super().__init__(node1.value + node2.value, [node1, node2])
 
     def storeDerivatives(self):
@@ -126,8 +143,8 @@ class _Addition(Node):
 
 
 class _Negation(Node):
-    def __init__(self, node: Node|float):
-        if not isinstance(node, Node): node = Node([node])
+    def __init__(self, node: Node|np.ndarray|float):
+        node = toNode(node)
         super().__init__(-node.value, [node])
 
     def storeDerivatives(self):
@@ -135,9 +152,9 @@ class _Negation(Node):
 
 
 class _Product(Node):
-    def __init__(self, node1: Node|float, node2: Node|float):
-        if not isinstance(node1, Node): node1 = Node([node1])
-        if not isinstance(node2, Node): node2 = Node([node2])
+    def __init__(self, node1: Node|np.ndarray|float, node2: Node|np.ndarray|float):
+        node1 = toNode(node1)
+        node2 = toNode(node2)
         super().__init__(node1.value * node2.value, [node1, node2])
 
     def storeDerivatives(self):
@@ -146,9 +163,9 @@ class _Product(Node):
 
 
 class _Division(Node):
-    def __init__(self, node1: Node|float, node2: Node|float):
-        if not isinstance(node1, Node): node1 = Node([node1])
-        if not isinstance(node2, Node): node2 = Node([node2])
+    def __init__(self, node1: Node|np.ndarray|float, node2: Node|np.ndarray|float):
+        node1 = toNode(node1)
+        node2 = toNode(node2)
         super().__init__(node1.value / node2.value, [node1, node2])
 
     def storeDerivatives(self):
@@ -157,9 +174,9 @@ class _Division(Node):
 
 
 class _Power(Node):
-    def __init__(self, base_node: Node|float, exp_node: Node|float):
-        if not isinstance(base_node, Node): base_node = Node([base_node])
-        if not isinstance(exp_node, Node): exp_node = Node([exp_node])
+    def __init__(self, base_node: Node|np.ndarray|float, exp_node: Node|np.ndarray|float):
+        base_node = toNode(base_node)
+        exp_node = toNode(exp_node)
         super().__init__(base_node.value ** exp_node.value, [base_node, exp_node])
 
     def storeDerivatives(self):
@@ -168,8 +185,8 @@ class _Power(Node):
 
 
 class _NaturalLog(Node):
-    def __init__(self, node: Node|float):
-        if not isinstance(node, Node): node = Node([node])
+    def __init__(self, node: Node|np.ndarray|float):
+        node = toNode(node)
         super().__init__(np.log(node.value), [node])
 
     def storeDerivatives(self):
@@ -177,8 +194,8 @@ class _NaturalLog(Node):
 
 
 class _Exponential(Node):
-    def __init__(self, node: Node|float):
-        if not isinstance(node, Node): node = Node([node])
+    def __init__(self, node: Node|np.ndarray|float):
+        node = toNode(node)
         super().__init__(np.exp(node.value), [node])
 
     def storeDerivatives(self):
@@ -186,9 +203,9 @@ class _Exponential(Node):
 
 
 class _MatrixMultiplication(Node):
-    def __init__(self, node1: Node|float, node2: Node|float):
-        if not isinstance(node1, Node): node1 = Node([node1])
-        if not isinstance(node2, Node): node2 = Node([node2])
+    def __init__(self, node1: Node|np.ndarray|float, node2: Node|np.ndarray|float):
+        node1 = toNode(node1)
+        node2 = toNode(node2)
         super().__init__(node1.value @ node2.value, [node1, node2])
 
     def storeDerivatives(self):
@@ -196,9 +213,18 @@ class _MatrixMultiplication(Node):
         self.parents[1].grad += _matchShape( self.parents[0].value.T @ self.grad, self.parents[1].grad.shape )
 
 
+class _Transpose(Node):
+    def __init__(self, node: Node|np.ndarray|float):
+        node = toNode(node)
+        super().__init__(node.value.T, [node])
+
+    def storeDerivatives(self):
+        self.parents[0].grad += _matchShape( self.grad.T, self.parents[0].grad.shape )
+
+
 class ReLU(Node):
-    def __init__(self, node: Node|float):
-        if not isinstance(node, Node): node = Node([node])
+    def __init__(self, node: Node|np.ndarray|float):
+        node = toNode(node)
         super().__init__(np.maximum(node.value, 0), [node])
 
     def storeDerivatives(self):
