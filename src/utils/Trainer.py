@@ -24,10 +24,11 @@ class Trainer:
 
 
     def train(self, epochs: int):
-        for epoch in range(epochs):
+        for epoch in (pbar := tqdm(range(epochs), position=0)):
             epoch_train_loss = 0
 
-            for inputs, labels in self.train_data:
+            for i, (inputs, labels) in enumerate(self.train_data):
+                pbar.set_description(f"Batch {i+1}/{len(self.train_data)}")
                 self.optimizer.zero_grad()
                 preds = self.model(inputs)
                 batch_loss = self.loss(preds, labels)
@@ -37,7 +38,7 @@ class Trainer:
                 epoch_train_loss += batch_loss.value
 
             epoch_train_loss = epoch_train_loss / len(self.train_data)
-            print(f"Epoch {epoch+1} | train_loss: {epoch_train_loss:.4f}")
             self.tot_epochs += 1
+            pbar.write(f"Epoch {self.tot_epochs} | train_loss: {epoch_train_loss:.4f}")
         
         return self.model
