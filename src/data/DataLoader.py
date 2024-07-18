@@ -17,6 +17,11 @@ class DataLoader:
         return len(self.inputs) // self.batch_size
     
 
+    @property
+    def size(self):
+        return len(self) * self.batch_size
+    
+
     def __getitem__(self, idx):
         indexes = self.indexes[idx*self.batch_size : (idx+1)*self.batch_size]
         batch_inputs = [ self.inputs[indexes[i]] for i in range(len(indexes)) ]
