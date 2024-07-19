@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from differentiation import Node
+from layers import Parameters
 
 
 
 class Optimizer(ABC):
-    def __init__(self, parameters: list[Node], lr: float=1e-3):
+    def __init__(self, parameters: list[Parameters], lr: float=1e-3):
         self.parameters = parameters
         self.lr = lr
 

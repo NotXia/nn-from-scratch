@@ -1,11 +1,11 @@
 from .Optimizer import Optimizer
-from differentiation import Node
+from layers import Parameters
 import numpy as np
 
 
 
 class Adam(Optimizer):
-    def __init__(self, parameters: list[Node], lr: float=1e-3, 
+    def __init__(self, parameters: list[Parameters], lr: float=1e-3, 
         beta1: float = 0.9,
         beta2: float = 0.999,
         eps: float = 1e-8
@@ -31,4 +31,4 @@ class Adam(Optimizer):
             self.moment2[i] = self.beta2*self.moment2[i] + (1-self.beta2)*grad**2
             m = self.moment1[i] / (1 - self.beta1**self.tot_steps)
             v = self.moment2[i] / (1 - self.beta2**self.tot_steps)
-            param.value -= (self.lr * m) / (np.sqrt(v)+ self.eps)
+            param.step( (self.lr * m) / (np.sqrt(v)+ self.eps) )
