@@ -21,7 +21,7 @@ def _matchShape(arr: np.ndarray, target_shape: tuple[int]) -> np.ndarray:
 def toNode(x: Node|np.ndarray|float) -> Node:
     if isinstance(x, Node): 
         return x
-    if isinstance(x, float): 
+    elif isinstance(x, float): 
         return Node([x])
     else:
         return Node(x) 
@@ -127,6 +127,23 @@ class Node:
 
     def max(self) -> Node:
         return _Max(self)
+    
+
+    @staticmethod
+    def concatenate(nodes: list[Node]|list[np.ndarray], axis: int=-1):
+        return _Concatenate(nodes, axis)
+    
+
+    def flatten(self):
+        return _Flatten(self)
+
+
+    def reshape(self, new_shape):
+        return _Reshape(self, new_shape)
+    
+
+    def pad(self, pad_width, mode="constant", **kwargs):
+        return _Pad(self, pad_width, mode, **kwargs)
 
 
 
@@ -237,6 +254,45 @@ class _Max(Node):
 
     def storeDerivatives(self):
         self.parents[0].grad += _matchShape( self.grad * (self.parents[0].value == self.value), self.parents[0].grad.shape )
+
+
+class _Concatenate(Node):
+    def __init__(self, nodes: list[Node]|list[np.ndarray], axis: int=-1):
+        for i in range(len(nodes)): nodes[i] = toNode(nodes[i])
+        super().__init__(np.concatenate([node.value for node in nodes], axis=axis), nodes)
+
+    def storeDerivatives(self):
+        for i in range(len(self.parents)):
+            self.parents[i].grad += _matchShape( self.grad, self.parents[i].grad.shape )
+
+
+class _Flatten(Node):
+    def __init__(self, node: Node|np.ndarray):
+        node = toNode(node)
+        super().__init__(node.value.flatten(), [node])
+
+    def storeDerivatives(self):
+        self.parents[0].grad += self.grad.flatten().reshape(self.parents[0].grad.shape)
+
+
+class _Reshape(Node):
+    def __init__(self, node: Node|np.ndarray, new_shape):
+        node = toNode(node)
+        super().__init__(node.value.reshape(new_shape), [node])
+
+    def storeDerivatives(self):
+        self.parents[0].grad += self.grad.flatten().reshape(self.parents[0].grad.shape)
+
+
+class _Pad(Node):
+    def __init__(self, node: Node|np.ndarray, pad_width, mode, **kwargs):
+        node = toNode(node)
+        super().__init__(np.pad(node.value, pad_width, mode, **kwargs), [node])
+        self.pad_width = [ p if len(p) == 2 else (p[0], p[0]) for p in pad_width ]
+
+    def storeDerivatives(self):
+        grad_slice = [ slice(p[0], -p[1]) if (p[0] != 0 and p[1] != 0) else slice(None, None) for p in self.pad_width ]
+        self.parents[0].grad += self.grad[*grad_slice]
 
 
 class ReLU(Node):
