@@ -59,14 +59,18 @@ class Trainer:
                         epoch_val_metrics[i] += metric_fn([p.value for p in preds], labels, average_over_batch=False)
 
 
+            logs = ""
             epoch_train_loss = epoch_train_loss / self.train_data.size
-            epoch_val_loss = epoch_val_loss / self.val_data.size
             epoch_train_metrics = [ m / self.train_data.size for m in epoch_train_metrics ]
-            epoch_val_metrics = [ m / self.val_data.size for m in epoch_val_metrics ]
             train_metrics_str = "| ".join([f"train_{name}: {epoch_train_metrics[i]:.4f}" for i, (name, _) in enumerate(self.metrics)])
-            val_metrics_str = "| ".join([f"val_{name}: {epoch_val_metrics[i]:.4f}" for i, (name, _) in enumerate(self.metrics)])
+            logs += f"Epoch {self.tot_epochs} | train_loss: {epoch_train_loss:.4f} {train_metrics_str}"
+            if self.val_data is not None:
+                epoch_val_loss = epoch_val_loss / self.val_data.size
+                epoch_val_metrics = [ m / self.val_data.size for m in epoch_val_metrics ]
+                val_metrics_str = "| ".join([f"val_{name}: {epoch_val_metrics[i]:.4f}" for i, (name, _) in enumerate(self.metrics)])
+                logs += f" || val_loss: {epoch_val_loss:.4f} {val_metrics_str}"
             self.tot_epochs += 1
-            pbar.write(f"Epoch {self.tot_epochs} | train_loss: {epoch_train_loss:.4f} {train_metrics_str} || val_loss: {epoch_val_loss:.4f} {val_metrics_str}")
+            pbar.write(logs)
 
             history.append({
                 "epoch": self.tot_epochs,
