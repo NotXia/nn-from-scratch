@@ -31,4 +31,4 @@ class Adam(Optimizer):
             self.moment2[i] = self.beta2*self.moment2[i] + (1-self.beta2)*grad**2
             m = self.moment1[i] / (1 - self.beta1**self.tot_steps)
             v = self.moment2[i] / (1 - self.beta2**self.tot_steps)
-            param.step( (self.lr * m) / (np.sqrt(v)+ self.eps) )
+            param.step( (self.lr * m) / (np.sqrt(v) + self.eps) )
