@@ -3,7 +3,7 @@ import numpy as np
 from differentiation import Node
 from layers.initializers import getConvInitializer
 from ..Parameters import Parameters
-import math
+from .utils import getOutputShape
 
 
 
@@ -15,17 +15,10 @@ class ParametersConvolution(Parameters):
         self.stride = stride
         self.params_position = {} # Keeps track of the positions of the kernel parameters in the convolution matrix
 
-    
-    def getOutShape(self, in_width, in_height):
-        return (
-            math.floor((in_width - self.width) / self.stride) + 1, 
-            math.floor((in_height - self.height) / self.stride) + 1
-        )
-
 
     def buildConvMatrix(self, in_width, in_height):
         in_flattened_shape = in_width * in_height * self.channels
-        out_width, out_height = self.getOutShape(in_width, in_height)
+        out_width, out_height = getOutputShape(in_width, in_height, self.width, self.height, self.stride)
         out_activations = out_width * out_height
         conv_matr = np.zeros(( out_activations, in_flattened_shape ))
         self.params_position = {}
@@ -118,7 +111,7 @@ class Conv2D(Layer):
             activations = []
             x = x.flatten().reshape((-1, 1))
             for kernel, bias in zip(self.kernels, self.biases):
-                out_width, out_height = kernel.getOutShape(in_width, in_height)
+                out_width, out_height = getOutputShape(in_width, in_height, kernel.width, kernel.height, kernel.stride)
                 activations.append( (kernel.node @ x + bias.node).reshape((out_width, out_height, 1)) )
             batch_activations.append( Node.concatenate(activations, axis=-1) )
 

@@ -138,12 +138,20 @@ class Node:
         return _Flatten(self)
 
 
-    def reshape(self, new_shape):
+    def reshape(self, new_shape: tuple[int]):
         return _Reshape(self, new_shape)
     
 
-    def pad(self, pad_width, mode="constant", **kwargs):
+    def pad(self, pad_width: tuple[tuple[int]], mode="constant", **kwargs):
         return _Pad(self, pad_width, mode, **kwargs)
+    
+
+    def __getitem__(self, idx_slice: tuple[slice]):
+        return _Slice(self, idx_slice)
+    
+
+    def maskAndShrink(self, mask: np.ndarray, new_shape: tuple[int]|None=None):
+        return _MaskAndShrink(self, mask, new_shape)
 
 
 
@@ -296,6 +304,31 @@ class _Pad(Node):
     def storeDerivatives(self):
         grad_slice = [ slice(p[0], -p[1]) if (p[0] != 0 and p[1] != 0) else slice(None, None) for p in self.pad_width ]
         self.parents[0].grad += self.grad[*grad_slice]
+
+
+class _Slice(Node):
+    def __init__(self, node: Node|np.ndarray, idx_slice: slice):
+        node = toNode(node)
+        super().__init__(node.value[idx_slice], [node])
+        self.idx_slice = idx_slice
+
+    def storeDerivatives(self):
+        self.parents[0].grad += self.grad[self.idx_slice]
+
+
+class _MaskAndShrink(Node):
+    def __init__(self, node: Node|np.ndarray, mask: np.ndarray, new_shape: tuple[int]|None=None):
+        node = toNode(node)
+        masked = np.ma.array(node.value, mask=(mask == 0)).compressed()
+        if new_shape is not None:
+            masked = masked.reshape(new_shape)
+        super().__init__(masked, [node])
+        self.mask = mask
+
+    def storeDerivatives(self):
+        decompressed_grad = np.zeros(self.parents[0].grad.shape)
+        decompressed_grad[np.where(self.mask == 1)] = self.grad.flatten()
+        self.parents[0].grad += decompressed_grad
 
 
 class ReLU(Node):
