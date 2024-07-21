@@ -1,8 +1,8 @@
-from .Layer import Layer
+from ..Layer import Layer
 import numpy as np
 from differentiation import Node
 from layers.initializers import getConvInitializer
-from .Parameters import Parameters
+from ..Parameters import Parameters
 import math
 
 

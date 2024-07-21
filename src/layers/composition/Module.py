@@ -1,5 +1,5 @@
 from abc import ABC
-from .Layer import Layer
+from ..Layer import Layer
 
 
 
