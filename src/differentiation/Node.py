@@ -260,10 +260,13 @@ class _Concatenate(Node):
     def __init__(self, nodes: list[Node]|list[np.ndarray], axis: int=-1):
         for i in range(len(nodes)): nodes[i] = toNode(nodes[i])
         super().__init__(np.concatenate([node.value for node in nodes], axis=axis), nodes)
+        self.axis = axis
 
     def storeDerivatives(self):
         for i in range(len(self.parents)):
-            self.parents[i].grad += _matchShape( self.grad, self.parents[i].grad.shape )
+            unconcat_slice = [ slice(None, None) ]*len(self.grad.shape)
+            unconcat_slice[self.axis] = slice(i, i+1)
+            self.parents[i].grad += self.grad[*unconcat_slice]
 
 
 class _Flatten(Node):
