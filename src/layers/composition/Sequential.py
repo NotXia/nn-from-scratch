@@ -9,14 +9,9 @@ class Sequential(Layer):
 
 
     def __call__(self, batch: list[Node]):
-        out = []
-
-        for x in batch:
-            for l in self.layers:
-                x = l(x)
-            out.append(x)
-            
-        return out
+        for l in self.layers:
+            batch = l(batch)
+        return batch
     
 
     def zero_grad(self):
