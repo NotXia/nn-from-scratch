@@ -6,7 +6,9 @@ import random
 class DataLoader:
     def __init__(self, inputs: np.ndarray, labels: np.ndarray, batch_size: int, shuffle: bool=True):
         assert len(inputs) == len(labels)
-        self.inputs = np.expand_dims(np.array(inputs), axis=-1) # Extra dimension for easier dot product
+        self.inputs = np.array(inputs)
+        if self.inputs.ndim == 2:
+            self.inputs = np.expand_dims(np.array(inputs), axis=-1) # Extra dimension for easier dot product with 1D vectors
         self.labels = np.array(labels)
         self.batch_size = batch_size
         self.shuffle = shuffle
