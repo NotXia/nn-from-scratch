@@ -27,11 +27,14 @@ class MaxPool(Layer):
         for ch in range(in_channels):
             for i in range(out_height):
                 for j in range(out_width):
+                    # Determine the index local to the kernel of the maximum value
                     start_i = i * self.stride
                     start_j = j * self.stride
                     kernel_slice = ( slice(ch, ch+1), slice(start_i, start_i+self.kernel_size), slice(start_j, start_j+self.kernel_size) )
                     max_kernel_idx = np.argmax(input[ kernel_slice ])
+                    # Converts the local index to a global index of the entire input
                     max_idx = ch*(in_width*in_height) + ( (start_i + max_kernel_idx//self.kernel_size)*in_width + (start_j + max_kernel_idx%self.kernel_size) )
+                    
                     activation_idx = ch*(out_width*out_height) + (i*out_width + j)
                     conv_matr[ activation_idx, max_idx ] = 1
 

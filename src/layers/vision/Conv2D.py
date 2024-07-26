@@ -85,8 +85,8 @@ class Conv2D(Layer):
         out_channels: int, 
         kernel_size: int = 3, 
         stride: int = 1, 
-        padding: str="valid", 
-        initializer: str="uniform"
+        padding: str = "valid", 
+        initializer: str = "uniform"
     ):
         initializer_fn = getConvInitializer(initializer)
         self.kernels = [ ParametersConvolution(initializer_fn(in_channels, kernel_size, kernel_size), stride) for _ in range(out_channels) ]

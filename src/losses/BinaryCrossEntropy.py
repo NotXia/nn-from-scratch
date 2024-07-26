@@ -1,5 +1,6 @@
 from .Loss import Loss
 from differentiation import Node
+import numpy as np
 
 
 
@@ -8,7 +9,7 @@ class BinaryCrossEntropy(Loss):
         pass
 
 
-    def __call__(self, preds: list[Node], labels: list[Node]) -> Node:
+    def __call__(self, preds: list[Node], labels: np.ndarray) -> Node:
         batch_loss = Node(0)
         
         for pred, label in zip(preds, labels):
