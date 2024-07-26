@@ -22,3 +22,7 @@ class Parameters:
 
     def step(self, step_size):
         self.node.value -= step_size 
+
+
+    def __len__(self):
+        return self.node.value.size

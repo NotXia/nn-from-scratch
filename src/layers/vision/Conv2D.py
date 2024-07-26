@@ -74,6 +74,10 @@ class ParametersConvolution(Parameters):
         self.kernel -= step_size 
 
 
+    def __len__(self):
+        return self.kernel.size
+
+
 
 class Conv2D(Layer):
     def __init__(self, 
@@ -99,9 +103,9 @@ class Conv2D(Layer):
         # Pad inputs
         if self.padding != 0:
             for i in range(len(batch)):
-                batch[i] = batch[i].pad(((self.padding,), (self.padding,), (0,)))
+                batch[i] = batch[i].pad(((0,), (self.padding,), (self.padding,)))
 
-        in_width, in_height, in_channels = batch[0].value.shape
+        in_channels, in_height, in_width = batch[0].value.shape
         batch_activations = []
 
         for kernel in self.kernels:
@@ -112,8 +116,8 @@ class Conv2D(Layer):
             x = x.flatten().reshape((-1, 1))
             for kernel, bias in zip(self.kernels, self.biases):
                 out_width, out_height = getOutputShape(in_width, in_height, kernel.width, kernel.height, kernel.stride)
-                activations.append( (kernel.node @ x + bias.node).reshape((out_width, out_height, 1)) )
-            batch_activations.append( Node.concatenate(activations, axis=-1) )
+                activations.append( (kernel.node @ x + bias.node).reshape((1, out_height, out_width)) )
+            batch_activations.append( Node.concatenate(activations, axis=0) )
 
         return batch_activations
     

@@ -14,6 +14,9 @@ def getInitializer(name: str) -> Callable:
 def getConvInitializer(name: str) -> Callable:
     match name:
         case "uniform": return uniformConv
+        case "xavier": return xavierConv
+        case "he": return heConv
+
 
 
 def xavier(in_dim: int, out_dim: int) -> np.ndarray:
@@ -39,3 +42,13 @@ def uniformConv(channels: int, height: int, width: int) -> np.ndarray:
     # Same as in PyTorch
     bound = np.sqrt( 1/(channels * height * width) )
     return np.random.uniform(-bound, bound, size=(channels, height, width))
+
+
+def xavierConv(channels: int, height: int, width: int) -> np.ndarray:
+    in_dim = channels * height * width
+    return np.random.uniform(-1 / np.sqrt(in_dim), 1 / np.sqrt(in_dim), size=(channels, height, width))
+
+
+def heConv(channels: int, height: int, width: int) -> np.ndarray:
+    in_dim = channels * height * width
+    return np.random.normal(0.0, np.sqrt(2/in_dim), size=(channels, height, width))
