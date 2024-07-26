@@ -316,21 +316,6 @@ class _Slice(Node):
         self.parents[0].grad += self.grad[self.idx_slice]
 
 
-class _MaskAndShrink(Node):
-    def __init__(self, node: Node|np.ndarray, mask: np.ndarray, new_shape: tuple[int]|None=None):
-        node = toNode(node)
-        masked = np.ma.array(node.value, mask=(mask == 0)).compressed()
-        if new_shape is not None:
-            masked = masked.reshape(new_shape)
-        super().__init__(masked, [node])
-        self.mask = mask
-
-    def storeDerivatives(self):
-        decompressed_grad = np.zeros(self.parents[0].grad.shape)
-        decompressed_grad[np.where(self.mask == 1)] = self.grad.flatten()
-        self.parents[0].grad += decompressed_grad
-
-
 class ReLU(Node):
     def __init__(self, node: Node|np.ndarray|float):
         node = toNode(node)
