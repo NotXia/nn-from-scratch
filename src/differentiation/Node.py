@@ -63,6 +63,11 @@ class Node:
             nodes_queue += node.parents
 
 
+    @property
+    def shape(self):
+        return self.value.shape
+
+
     def __add__(self, node: Node|np.ndarray|float) -> Node:
         return _Addition(self, node)
     

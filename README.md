@@ -10,6 +10,7 @@ Neural networks implemented using Numpy.
     - Linear
     - 2D convolutions
     - 2D max-pooling
+    - Batch normalization
 - **Activations**
     - Sigmoid
     - Softmax
