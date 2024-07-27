@@ -7,7 +7,7 @@ from ..Parameters import Parameters
 
 class Flatten(Layer):
     def __init__(self):
-        pass
+        super().__init__()
 
 
     def __call__(self, batch: list[Node]|list[np.ndarray]) -> list[Node]:

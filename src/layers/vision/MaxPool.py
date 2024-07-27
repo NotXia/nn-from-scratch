@@ -12,6 +12,7 @@ class MaxPool(Layer):
         kernel_size: int = 2, 
         stride: int = 2
     ):
+        super().__init__()
         self.in_channels = in_channels
         self.kernel_size = kernel_size
         self.stride = stride

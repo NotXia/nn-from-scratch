@@ -8,6 +8,7 @@ from ..Parameters import Parameters
 
 class Linear(Layer):
     def __init__(self, in_dim: int, out_dim: int, initializer: str="uniform"):
+        super().__init__()
         initializer_fn = getInitializer(initializer)
         self.weights = Parameters( Node(initializer_fn(in_dim, out_dim)) )
         self.biases = Parameters( Node(np.zeros((out_dim, 1))) )

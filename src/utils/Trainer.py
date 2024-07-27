@@ -35,6 +35,7 @@ class Trainer:
             epoch_val_metrics = [0] * len(self.metrics)
 
             # Training
+            self.model.train()
             for i, (inputs, labels) in enumerate(self.train_data):
                 pbar.set_description(f"Batch {i+1}/{len(self.train_data)}")
                 self.optimizer.zero_grad()
@@ -49,6 +50,7 @@ class Trainer:
 
 
             # Validation
+            self.model.inference()
             if self.val_data is not None:
                 for i, (inputs, labels) in enumerate(self.val_data):
                     preds = self.model(inputs)

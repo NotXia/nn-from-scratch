@@ -88,6 +88,7 @@ class Conv2D(Layer):
         padding: str = "valid", 
         initializer: str = "uniform"
     ):
+        super().__init__()
         initializer_fn = getConvInitializer(initializer)
         self.kernels = [ ParametersConvolution(initializer_fn(in_channels, kernel_size, kernel_size), stride) for _ in range(out_channels) ]
         self.biases = [ Parameters(Node([[0]])) for _ in range(out_channels) ]

@@ -6,6 +6,7 @@ from activations import *
 
 class _ActivationLayer(Layer):
     def __init__(self, activation_fn):
+        super().__init__()
         self.activation_fn = activation_fn
 
     def __call__(self, batch: list[Node]):

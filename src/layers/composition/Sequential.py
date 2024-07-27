@@ -5,6 +5,7 @@ from differentiation import Node
 
 class Sequential(Layer):
     def __init__(self, layers: list[Layer]):
+        super().__init__()
         self.layers = layers
 
 
@@ -24,3 +25,12 @@ class Sequential(Layer):
         for l in self.layers:
             params += l.parameters()
         return params
+    
+    
+    def train(self):
+        for l in self.layers:
+            l.train()
+
+    def inference(self):
+        for l in self.layers:
+            l.inference()
